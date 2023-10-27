@@ -62,6 +62,11 @@ app.get('/planAhead', async (req, res) => {
       return;
     }
 
+    //Calculate credit hours completed
+    const creditsCompleted = student[0].coursesTaken.reduce((total, course) => {
+      return total + course.creditHours;
+    }, 0);
+
     // Retrieve all classes
     const allClasses = await classesCollection.find().toArray();
 
@@ -72,7 +77,7 @@ app.get('/planAhead', async (req, res) => {
     // Create the object to render in the EJS template
     const studentWithCoursesNotTaken = {
       name: student[0].name,
-      creditsCompleted: student[0].creditsCompleted,
+      creditsCompleted: creditsCompleted,
       coursesTaken: student[0].coursesTaken,
       coursesNotTaken: coursesNotTaken
     };

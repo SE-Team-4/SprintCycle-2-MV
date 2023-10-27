@@ -1,7 +1,7 @@
 {
   "name": "interactivecoursetimeline",
   "version": "1.0.0",
-  "description": "",
+  "description": "After cloning, run the following in your command line inside the project folder: 1. npm init 2. npm i mongodb 3. npm i ejs 4. npm i express --save Then: Create a new file with the name: .env Inside .env, write DB_STRING = <database string here> We will put the DB string on discord. To run: npm run dev",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -17,10 +17,18 @@
     "dotenv": "^16.3.1",
     "ejs": "^3.1.9",
     "express": "^4.18.2",
-    "mongodb": "^6.1.0",
+    "mongodb": "^6.2.0",
     "react-bootstrap": "^2.9.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SE-Team-4/SprintCycle-2-MV.git"
+  },
+  "bugs": {
+    "url": "https://github.com/SE-Team-4/SprintCycle-2-MV/issues"
+  },
+  "homepage": "https://github.com/SE-Team-4/SprintCycle-2-MV#readme"
 }
