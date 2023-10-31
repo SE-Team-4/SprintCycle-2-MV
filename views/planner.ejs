@@ -18,26 +18,39 @@
     
     <h1>Course Planner</h1>
 
-    <form method="post" action="/planner">
-      <h2 class="<%= coursesNotTaken.length === 0 ? 'hide' : '' %>">Select Courses for Next Semester</h2>
-      <ul class="<%= coursesNotTaken.length === 0 ? 'hide' : '' %>">
-        <% coursesNotTaken.forEach(course => { %>
-          <li>
-            <input type="checkbox" name="selectedCourses" value="<%= course._id %>">
-            <%= course.courseNumber %> - <%= course.creditHours %> credit hours
-          </li>
-        <% }); %>
-      </ul>
-      <input type="hidden" name="currentCourses" value="<%= JSON.stringify(currentCourses) %>">
-      <button type="submit" class="<%= coursesNotTaken.length === 0 ? 'hide' : '' %>">Add Selected Courses to Your Plan</button>
-    </form>
-    
-    <h2 class="<%= currentCourses.length === 0 ? 'hide' : '' %>">Your Plan</h2>
-      <ul>
-        <% currentCourses.forEach(course => { %>
-          <li><%= course.courseNumber %> - <%= course.creditHours %> credit hours</li>
-        <% }); %>
-      </ul>
-        
+<!-- Display recommended next courses -->
+<h2 id="recommended-courses" class="<%= recommendations.length === 0 ? 'hide' : '' %>">Recommended Next Courses</h2>
+<ul>
+  <% recommendations.forEach(recommendation => { %>
+    <ul>
+      <% recommendation.recommendedCourses.forEach(recommendedCourse => { %>
+        <li><%= recommendedCourse.courseNumber %> - <%= recommendedCourse.creditHours %> credit hours</li>
+      <% }); %>
+    </ul>
+  <% }); %>
+</ul>
+
+<form method="post" action="/planner">
+  <h2 class="<%= coursesNotTaken.length === 0 ? 'hide' : '' %>">Select Courses for Next Semester</h2>
+  <ul class="<%= coursesNotTaken.length === 0 ? 'hide' : '' %>">
+    <% coursesNotTaken.forEach(course => { %>
+      <li>
+        <input type="checkbox" name="selectedCourses" value="<%= course._id %>">
+        <%= course.courseNumber %> - <%= course.creditHours %> credit hours
+      </li>
+    <% }); %>
+  </ul>
+  <input type="hidden" name="currentCourses" value="<%= JSON.stringify([]) %>">
+  <button type="submit" class="<%= coursesNotTaken.length === 0 ? 'hide' : '' %>">Add Selected Courses to Your Plan</button>
+</form>
+
+<h2 class="<%= currentCourses.length === 0 ? 'hide' : '' %>">Your Plan</h2>
+<ul>
+  <% currentCourses.forEach(course => { %>
+    <li><%= course.courseNumber %> - <%= course.creditHours %> credit hours</li>
+  <% }); %>
+</ul>
+
+
 </body>
 </html>

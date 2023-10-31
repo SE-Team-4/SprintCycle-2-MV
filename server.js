@@ -7,7 +7,7 @@ require('dotenv').config();
 
 let dbConnectionStr = process.env.DB_STRING;
 let classesCollection; 
-let student1Collection;
+let studentsCollection;
 
 
 app.set('view engine', 'ejs');
@@ -17,7 +17,7 @@ MongoClient.connect(dbConnectionStr, { useUnifiedTopology: true })
     console.log(`Connected to Database`);
     const db = client.db('CourseTimeline');
     classesCollection = db.collection('classes');
-    student1Collection = db.collection('student1');
+    studentsCollection = db.collection('student1');
   })
   .catch(error => {
     console.error('Error connecting to the database:', error);
@@ -27,12 +27,12 @@ app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/index.html');
+app.get('/', async (req, res) => {
+  res.render('index');
 });
 
 //in place of a login for now
-let selectedStudent = '12345';
+let selectedStudent = '102899';
 
 app.get('/planAhead', async (req, res) => {
   try {
@@ -42,7 +42,7 @@ app.get('/planAhead', async (req, res) => {
     }
 
     // Retrieve the selected student using the global variable
-    const student = await student1Collection.aggregate([
+    const student = await studentsCollection.aggregate([
       {
         $match: { studentId: selectedStudent } 
       },
@@ -105,26 +105,67 @@ app.get('/planner', async (req, res) => {
   try {
     // Define coursesNotTaken as an empty array
     let coursesNotTaken = [];
+    let activeCourses = [];
 
     // Populate coursesNotTaken based on the conditions in your GET route
-    const student = await student1Collection.findOne({ studentId: selectedStudent });
+    const student = await studentsCollection.findOne({ studentId: selectedStudent });
     if (student) {
       const allClasses = await fetchAllCourses();
       coursesNotTaken = allClasses.filter(course => !student.coursesTaken.includes(course._id));
     }
 
-    // Render the 'planner' template and pass the data
-    res.render('planner', { coursesNotTaken, currentCourses });
+    if (student) {
+      let currentCourses = student.currentCourses;
+
+      const allClasses = await fetchAllCourses();
+
+      // Find active courses that are in currentCourses
+      activeCourses = allClasses.filter(course => currentCourses.includes(course._id));
+
+      // Create recommendations based on the nextCourses array
+      const recommendations = [];
+      activeCourses.forEach(activeCourse => {
+        if (activeCourse.nextCourses && Array.isArray(activeCourse.nextCourses)) {
+          const activeCourseRecommendations = allClasses.filter(course =>
+            course._id !== activeCourse._id && // Exclude the active course
+            activeCourse.nextCourses.includes(course._id)
+          );
+
+          if (activeCourseRecommendations.length > 0) {
+            recommendations.push({
+              course: activeCourse,
+              recommendedCourses: activeCourseRecommendations,
+            });
+          }
+        }
+      });
+
+      currentCourses = [];
+
+      // Render the 'planner' template and pass the data
+      res.render('planner', {
+        coursesNotTaken,
+        currentCourses,
+        activeCourses,
+        recommendations,
+      });
+    } else {
+      // Handle the case where the student is not found
+      res.status(404).send('Student not found');
+    }
   } catch (error) {
     console.error('Error:', error);
     res.status(500).send('Internal Server Error');
   }
 });
 
+
 app.post('/planner', async (req, res) => {
   try {
     // Define coursesNotTaken as an empty array
     let coursesNotTaken = [];
+    //let activeCourses = [];
+    let recommendations = [];
 
     // Populate coursesNotTaken based on the conditions in your POST route if needed
 
@@ -149,6 +190,7 @@ app.post('/planner', async (req, res) => {
       coursesNotTaken: coursesNotTaken,
       selectedCourses: selectedCourses,
       currentCourses: currentCourses.concat(selectedCourses),
+      recommendations: recommendations,
     });
   } catch (error) {
     console.error('Error:', error);
